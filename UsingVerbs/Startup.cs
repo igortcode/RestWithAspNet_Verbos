@@ -41,6 +41,7 @@ namespace UsingVerbs
             var serverVersion = new MySqlServerVersion(new Version(8, 0, 25)); 
             
             services.AddDbContext<Context>(op => op.UseMySql(Configuration.GetConnectionString("Connection"), serverVersion));
+            services.AddApiVersioning();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

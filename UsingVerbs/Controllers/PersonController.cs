@@ -10,8 +10,9 @@ using UsingVerbs.Services;
 
 namespace UsingVerbs.Controllers
 {
+    [ApiVersion("1")]
     [ApiController]
-    [Route("api/{controller}")]
+    [Route("api/{controller}/v{version:apiVersion}")]
     public class PersonController : Controller
     {
         private readonly IPersonService _personService;
