@@ -1,20 +1,16 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using UsingVerbs.Business;
+using UsingVerbs.Business.Implementations;
 using UsingVerbs.Data;
-using UsingVerbs.Services;
-using UsingVerbs.Services.Implementations;
+using UsingVerbs.Repository;
+using UsingVerbs.Repository.Implementations;
 
 namespace UsingVerbs
 {
@@ -33,7 +29,8 @@ namespace UsingVerbs
 
             services.AddControllers();
             //Dependency Injection
-            services.AddScoped<IPersonService, PersonServiceImplementation>();
+            services.AddScoped<IPersonBusiness, PersonBusinessImplementation>();
+            services.AddScoped<IPersonRepository, PersonRepositoryImplementation>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "UsingVerbs", Version = "v1" });

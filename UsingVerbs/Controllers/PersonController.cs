@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UsingVerbs.Business;
 using UsingVerbs.Data;
 using UsingVerbs.Model;
-using UsingVerbs.Services;
 
 namespace UsingVerbs.Controllers
 {
@@ -15,32 +15,35 @@ namespace UsingVerbs.Controllers
     [Route("api/{controller}/v{version:apiVersion}")]
     public class PersonController : Controller
     {
-        private readonly IPersonService _personService;
-        private readonly Context _context;
+        private readonly IPersonBusiness _personBusiness;
         private readonly ILogger<PersonController> _logger;
 
-        public PersonController(ILogger<PersonController> logger, IPersonService personService, Context context)
+        public PersonController(ILogger<PersonController> logger, IPersonBusiness personService)
         {
             _logger = logger;
-            _personService = personService;
-            _context = context;
+            _personBusiness = personService;
         }
 
         [HttpGet]
         public IActionResult Get()
         {
-            List<Person> people = _context.People.ToList();
-            return Ok(people);
+            return Ok(_personBusiness.FindAll());
         }
 
         [HttpGet("{id}")]
         public IActionResult Get(long id)
         {
-            var person = _context.People.Find(id);
-            if (person == null) 
-                return NotFound();
-            else
+
+            try
+            {
+                var person = _personBusiness.FindById(id);
                 return Ok(person);
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+
         }
 
         [HttpPost]
@@ -48,12 +51,18 @@ namespace UsingVerbs.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.People.Add(person); 
-                _context.SaveChanges();
-                return Ok(_context.People.OrderBy(p => p.Id).Last());
+
+                try
+                {
+                    return Ok(_personBusiness.Create(person));
+                }
+                catch (Exception)
+                {
+                    return BadRequest();
+                }
             }
             return BadRequest("Dados inconsistentes!");
-            
+
         }
 
         [HttpPut]
@@ -61,10 +70,19 @@ namespace UsingVerbs.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.People.Update(person);
-                _context.SaveChanges();
-               
-                return Ok(_context.People.Find(person.Id));
+                try
+                {
+                    Person p = _personBusiness.Update(person);
+                    if (p != null)
+                        return Ok(p);
+                    else
+                        return NotFound();
+                }
+                catch (Exception)
+                {
+                    BadRequest();
+                }
+
             }
             return BadRequest("Dados inconsistentes!");
         }
@@ -73,18 +91,17 @@ namespace UsingVerbs.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(long id)
         {
-            var pessoa = _context.People.Find(id);
-            if(pessoa == null)
+            try
             {
-                return NotFound();
+                if (_personBusiness.Delete(id))
+                    return NoContent();
+                else
+                    return NotFound();
             }
-
-            _context.People.Remove(pessoa);
-            _context.SaveChanges();
-            return NoContent();
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
-
-
-
     }
 }
